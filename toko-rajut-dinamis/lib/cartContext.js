@@ -73,20 +73,21 @@ const INITIAL_CATEGORIES = [
 export function CartProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [cartItems, setCartItems] = useState(() => {
+  const [cartItems, setCartItems] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [adminSession, setAdminSession] = useState(null);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedCart = localStorage.getItem('lyffa_cart');
       if (savedCart) {
         try {
-          return JSON.parse(savedCart);
+          setCartItems(JSON.parse(savedCart));
         } catch (e) {}
       }
     }
-    return [];
-  });
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [adminSession, setAdminSession] = useState(null);
+  }, []);
 
   // Helper to ensure clean sequential category IDs (1, 2, 3, 4, 5...)
   const normalizeCategoryIds = (catList) => {
