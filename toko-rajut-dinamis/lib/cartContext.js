@@ -157,11 +157,41 @@ export function CartProvider({ children }) {
         }
       }
 
+      // Helper to normalize payment method (Migrates old COD/Tunai to QRIS)
+      const normalizePaymentMethod = (methodStr) => {
+        if (!methodStr) return 'QRIS';
+        const lower = methodStr.toLowerCase();
+        if (lower.includes('cod') || lower.includes('tunai') || lower.includes('cash') || lower.includes('tempat')) {
+          return 'QRIS';
+        }
+        if (lower.includes('transfer')) {
+          return 'Transfer Bank';
+        }
+        return methodStr;
+      };
+
+      // Auto-update database rows in Supabase asynchronously
+      try {
+        supabase
+          .from('transaksi')
+          .update({ metode_pembayaran: 'QRIS' })
+          .or('metode_pembayaran.ilike.%cod%,metode_pembayaran.ilike.%tunai%,metode_pembayaran.ilike.%cash%,metode_pembayaran.ilike.%tempat%')
+          .then(({ error }) => {
+            if (error) console.log('Supabase auto update skipped:', error.message);
+          });
+      } catch (e) {}
+
       // 3. Transactions History
       const storedTx = localStorage.getItem('sales_transactions');
       if (storedTx) {
         try {
-          setTransactions(JSON.parse(storedTx));
+          const parsed = JSON.parse(storedTx);
+          const updatedTx = parsed.map((t) => ({
+            ...t,
+            metode: normalizePaymentMethod(t.metode),
+          }));
+          setTransactions(updatedTx);
+          localStorage.setItem('sales_transactions', JSON.stringify(updatedTx));
         } catch (e) {}
       } else {
         const { data: dbTx, error: txErr } = await supabase
@@ -176,7 +206,7 @@ export function CartProvider({ children }) {
             nama: t.nama_pembeli,
             whatsapp: t.whatsapp,
             alamat: t.alamat,
-            metode: t.metode_pembayaran,
+            metode: normalizePaymentMethod(t.metode_pembayaran),
             total: t.total_harga,
             items: (t.detail_transaksi || []).map((d) => ({
               id: d.id_produk,
@@ -195,7 +225,7 @@ export function CartProvider({ children }) {
               nama: 'Siti Rahma',
               whatsapp: '08123456789',
               alamat: 'Jl. Pemuda No. 45, Bandung',
-              metode: 'Tunai',
+              metode: 'QRIS',
               total: 185000,
               items: [{ name: 'Sweater Rajut Wool Modern', price: 185000, quantity: 1 }],
             },

@@ -29,7 +29,7 @@ export default function CheckoutPage() {
     nama: '',
     whatsapp: '',
     alamat: '',
-    metode: 'Tunai (Cash)',
+    metode: 'QRIS',
   });
   const [errors, setErrors] = useState({});
   const [receiptData, setReceiptData] = useState(null);
@@ -197,37 +197,37 @@ export default function CheckoutPage() {
             <label className="block text-xs font-bold text-slate-700">
               Metode Pembayaran
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, metode: 'Cod (Bayar ditempat)' })}
-                className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center gap-1.5 ${
-                  formData.metode === 'Cod (Bayar ditempat)'
+                onClick={() => setFormData({ ...formData, metode: 'QRIS' })}
+                className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
+                  formData.metode === 'QRIS'
                     ? 'border-slate-900 bg-slate-50 text-slate-900 font-extrabold shadow-sm'
-                    : 'border-slate-200 bg-white text-slate-600 font-semibold'
+                    : 'border-slate-200 bg-white text-slate-600 font-semibold hover:bg-slate-50'
                 }`}
               >
-                <Banknote className="w-5 h-5 text-slate-500" />
-                <span className="text-[11px]">Cod</span>
+                <QrCode className="w-5 h-5 text-slate-700" />
+                <span className="text-xs">QRIS</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, metode: 'Transfer Bank' })}
-                className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center gap-1.5 ${
-                  formData.metode === 'Transfer Bank (BCA/BRI)'
+                className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
+                  formData.metode === 'Transfer Bank'
                     ? 'border-slate-900 bg-slate-50 text-slate-900 font-extrabold shadow-sm'
-                    : 'border-slate-200 bg-white text-slate-600 font-semibold'
+                    : 'border-slate-200 bg-white text-slate-600 font-semibold hover:bg-slate-50'
                 }`}
               >
-                <CreditCard className="w-5 h-5 text-slate-500" />
-                <span className="text-[11px]">Transfer</span>
+                <CreditCard className="w-5 h-5 text-slate-700" />
+                <span className="text-xs">Transfer Bank</span>
               </button>
             </div>
             
             <button
               type="submit"
-              className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
+              className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
             >
               <ShieldCheck className="w-5 h-5" />
               <span>Pesan Sekarang</span>
