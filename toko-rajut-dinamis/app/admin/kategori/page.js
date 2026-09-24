@@ -170,38 +170,52 @@ export default function AdminKategoriPage() {
       <table className="w-full text-left text-xs sm:text-sm">
         <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold">
           <tr>
-            <th className="p-3">ID</th>
+            <th className="p-3">No</th>
             <th className="p-3">Nama Kategori</th>
+            <th className="p-3">Total Produk</th>
             <th className="p-3 text-right">Aksi</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
-          {categories.map((c) => (
-            <tr key={c.id} className="hover:bg-slate-50">
-              <td className="p-3 font-mono text-slate-400">{c.id}</td>
-              <td className="p-3 font-bold text-slate-900">{c.nama_kategori}</td>
-              <td className="p-3 text-right">
-                <div className="flex items-center justify-end gap-1">
-                  <button
-                    onClick={() => {
-                      setEditingCategory(c);
-                      setCategoryInput(c.nama_kategori);
-                      setShowCategoryModal(true);
-                    }}
-                    className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg cursor-pointer"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCategory(c.id)}
-                    className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+          {categories.map((c) => {
+            const prodCount = products.filter(
+              (p) => p.category?.toLowerCase().trim() === c.nama_kategori?.toLowerCase().trim()
+            ).length;
+
+            return (
+              <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                <td className="p-3 font-mono text-slate-400">{c.id}</td>
+                <td className="p-3 font-bold text-slate-900">{c.nama_kategori}</td>
+                <td className="p-3">
+                  <span className="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold rounded-lg">
+                    {prodCount} produk
+                  </span>
+                </td>
+                <td className="p-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => {
+                        setEditingCategory(c);
+                        setCategoryInput(c.nama_kategori);
+                        setShowCategoryModal(true);
+                      }}
+                      className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg cursor-pointer"
+                      title="Edit Kategori"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCategory(c.id)}
+                      className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
+                      title="Hapus Kategori"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 

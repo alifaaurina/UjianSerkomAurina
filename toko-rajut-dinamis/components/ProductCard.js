@@ -18,7 +18,7 @@ export default function ProductCard({ product, onSelect }) {
 
   return (
     <div className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg hover:border-slate-300 transition-all duration-300 flex flex-col justify-between">
-      
+
       <div>
         {/* Image Box */}
         <div
@@ -29,9 +29,8 @@ export default function ProductCard({ product, onSelect }) {
             <img
               src={product.image}
               alt={product.name}
-              className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
-                isOutOfStock ? 'grayscale opacity-60' : ''
-              }`}
+              className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${isOutOfStock ? 'grayscale opacity-60' : ''
+                }`}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-slate-400 font-medium text-xs">
@@ -86,11 +85,10 @@ export default function ProductCard({ product, onSelect }) {
             if (!isOutOfStock) addToCart(product, 1);
           }}
           disabled={isOutOfStock}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
-            isOutOfStock
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${isOutOfStock
               ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
               : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900 active:scale-95'
-          }`}
+            }`}
           title={isOutOfStock ? 'Stok produk habis' : 'Tambah ke Keranjang'}
         >
           <ShoppingCart className="w-4 h-4" />

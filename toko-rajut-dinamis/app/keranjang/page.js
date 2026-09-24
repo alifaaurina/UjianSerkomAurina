@@ -98,7 +98,7 @@ export default function KeranjangPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 min-h-[80vh]">
-      
+
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-200 pb-4">
         <div>
@@ -127,11 +127,11 @@ export default function KeranjangPage() {
           </div>
           <h3 className="text-lg font-bold text-slate-900">Keranjang Belanja Masih Kosong</h3>
           <p className="text-xs text-slate-500 leading-relaxed">
-            Anda belum memasukkan produk rajut ke dalam keranjang. Silakan pilih produk menarik di katalog kami.
+            Anda belum memasukkan produk ke dalam keranjang. Silakan pilih produk menarik di katalog kami.
           </p>
           <Link
             href="/katalog"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl transition-all shadow-md"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl transition-all shadow-md"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Lihat Katalog Produk</span>
@@ -139,10 +139,10 @@ export default function KeranjangPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* Cart Items List */}
           <div className="lg:col-span-8 space-y-4">
-            
+
             {/* Select All Toggle Bar */}
             <div className="bg-white p-4 border border-slate-200 rounded-2xl shadow-xs flex items-center justify-between">
               <label className="flex items-center gap-3 cursor-pointer select-none">
@@ -152,11 +152,11 @@ export default function KeranjangPage() {
                   onChange={toggleSelectAll}
                   className="w-5 h-5 accent-slate-900 rounded cursor-pointer"
                 />
-                <span className="text-xs sm:text-sm font-extrabold text-slate-800">
-                  Pilih Semua ({cartItems.length} produk)
+                <span className="text-xs sm:text-sm font-medium text-slate-800">
+                  Pilih Semua
                 </span>
               </label>
-              <span className="text-xs font-bold text-slate-500">
+              <span className="text-xs font-medium text-slate-500">
                 Terpilih: <strong className="text-slate-900">{selectedIds.length}</strong> produk
               </span>
             </div>
@@ -166,9 +166,8 @@ export default function KeranjangPage() {
               return (
                 <div
                   key={item.id}
-                  className={`bg-white p-4 sm:p-5 border rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all ${
-                    isSelected ? 'border-slate-800 ring-1 ring-slate-800/10' : 'border-slate-200 opacity-80 hover:opacity-100'
-                  }`}
+                  className={`bg-white p-4 sm:p-5 border rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all ${isSelected ? 'border-slate-800 ring-1 ring-slate-800/10' : 'border-slate-200 opacity-80 hover:opacity-100'
+                    }`}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     {/* Checkbox item */}
@@ -199,7 +198,7 @@ export default function KeranjangPage() {
 
                   {/* Subtotal & Quantity Actions */}
                   <div className="flex items-center justify-between w-full sm:w-auto gap-6 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                    
+
                     {/* Quantity Selector */}
                     <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
                       <button
@@ -222,7 +221,7 @@ export default function KeranjangPage() {
                     {/* Subtotal preview: jumlah x harga */}
                     <div className="text-right">
                       <span className="text-[10px] text-slate-400 font-semibold block">Subtotal</span>
-                      <span className="text-sm sm:text-base font-extrabold text-slate-900">
+                      <span className="text-sm sm:text-base font-bold text-slate-900">
                         {formatRupiah(item.price * item.quantity)}
                       </span>
                     </div>
@@ -231,7 +230,7 @@ export default function KeranjangPage() {
                     <button
                       onClick={() => removeFromCart(item.id)}
                       className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
-                      title="Hapus dari Keranjang"
+                      title="Hapus produk dari keranjang"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -246,13 +245,13 @@ export default function KeranjangPage() {
           {/* Cart Summary & Checkout Trigger */}
           <div className="lg:col-span-4">
             <div className="bg-white p-6 border border-slate-200 rounded-3xl shadow-md space-y-6 sticky top-24">
-              <h3 className="text-lg font-black text-slate-900 border-b border-slate-100 pb-3">
+              <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
                 Ringkasan Belanja
               </h3>
 
               <div className="space-y-3 text-xs sm:text-sm text-slate-600">
                 <div className="flex justify-between">
-                  <span>Produk Dipilih:</span>
+                  <span>Jumlah Produk Dipilih:</span>
                   <span className="font-bold text-slate-900">{selectedCartItems.length} produk</span>
                 </div>
 
@@ -274,11 +273,10 @@ export default function KeranjangPage() {
               <button
                 onClick={handleProceedToCheckout}
                 disabled={selectedCartItems.length === 0}
-                className={`w-full py-4 text-white font-black text-sm rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 active:scale-95 ${
-                  selectedCartItems.length === 0
+                className={`w-full py-4 text-white font-black text-sm rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 active:scale-95 ${selectedCartItems.length === 0
                     ? 'bg-slate-300 cursor-not-allowed shadow-none'
                     : 'bg-slate-900 hover:bg-slate-800'
-                }`}
+                  }`}
               >
                 <span>Lanjut ke Checkout ({selectedCartItems.length})</span>
                 <ArrowRight className="w-5 h-5" />
@@ -289,7 +287,7 @@ export default function KeranjangPage() {
                 className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition-all flex items-center justify-center gap-2 border border-slate-200"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Lanjut Belanja (Pilih Produk Lain)</span>
+                <span>Lanjut Belanja</span>
               </Link>
             </div>
           </div>

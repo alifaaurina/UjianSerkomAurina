@@ -181,42 +181,41 @@ export function CartProvider({ children }) {
           });
       } catch (e) {}
 
-      // 3. Transactions History
-      const storedTx = localStorage.getItem('sales_transactions');
-      if (storedTx) {
-        try {
-          const parsed = JSON.parse(storedTx);
-          const updatedTx = parsed.map((t) => ({
-            ...t,
-            metode: normalizePaymentMethod(t.metode),
-          }));
-          setTransactions(updatedTx);
-          localStorage.setItem('sales_transactions', JSON.stringify(updatedTx));
-        } catch (e) {}
-      } else {
-        const { data: dbTx, error: txErr } = await supabase
-          .from('transaksi')
-          .select('*, detail_transaksi(*)')
-          .order('id', { ascending: false });
+      // 3. Transactions History (Always sync from Supabase first to keep DB & Website 100% synchronized)
+      const { data: dbTx, error: txErr } = await supabase
+        .from('transaksi')
+        .select('*, detail_transaksi(*)')
+        .order('id', { ascending: false });
 
-        if (!txErr && dbTx && dbTx.length > 0) {
-          const mappedTx = dbTx.map((t) => ({
-            id: t.no_transaksi,
-            date: t.created_at,
-            nama: t.nama_pembeli,
-            whatsapp: t.whatsapp,
-            alamat: t.alamat,
-            metode: normalizePaymentMethod(t.metode_pembayaran),
-            total: t.total_harga,
-            items: (t.detail_transaksi || []).map((d) => ({
-              id: d.id_produk,
-              name: d.nama_produk,
-              price: d.harga_satuan,
-              quantity: d.jumlah,
-            })),
-          }));
-          setTransactions(mappedTx);
-          localStorage.setItem('sales_transactions', JSON.stringify(mappedTx));
+      if (!txErr && dbTx && dbTx.length > 0) {
+        const mappedTx = dbTx.map((t) => ({
+          id: t.no_transaksi,
+          date: t.created_at,
+          nama: t.nama_pembeli,
+          whatsapp: t.whatsapp,
+          alamat: t.alamat,
+          metode: normalizePaymentMethod(t.metode_pembayaran),
+          total: t.total_harga,
+          items: (t.detail_transaksi || []).map((d) => ({
+            id: d.id_produk,
+            name: d.nama_produk,
+            price: d.harga_satuan,
+            quantity: d.jumlah,
+          })),
+        }));
+        setTransactions(mappedTx);
+        localStorage.setItem('sales_transactions', JSON.stringify(mappedTx));
+      } else {
+        const storedTx = localStorage.getItem('sales_transactions');
+        if (storedTx) {
+          try {
+            const parsed = JSON.parse(storedTx);
+            const updatedTx = parsed.map((t) => ({
+              ...t,
+              metode: normalizePaymentMethod(t.metode),
+            }));
+            setTransactions(updatedTx);
+          } catch (e) {}
         } else {
           const dummyTx = [
             {

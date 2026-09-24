@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingBag, ShieldCheck, Home, Grid, UserCheck } from 'lucide-react';
+import { ShoppingBag, ShieldCheck, Home, Grid, UserCheck, User } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 
 import { useState, useEffect } from 'react';
@@ -25,6 +25,7 @@ export default function Navbar() {
     return false;
   };
 
+  //header utama
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
@@ -67,7 +68,7 @@ export default function Navbar() {
             }`}
           >
             <Grid className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">Katalog Produk</span>
+            <span>Katalog Produk</span>
             <span className="inline sm:hidden">Katalog</span>
           </Link>
 
@@ -112,7 +113,7 @@ export default function Navbar() {
                   : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm'
               }`}
             >
-              <ShieldCheck className="w-4 h-4 text-slate-300 shrink-0" />
+              <User className="w-4 h-4 text-slate-300 shrink-0" />
               <span>Login</span>
             </Link>
           )}

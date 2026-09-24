@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cartContext';
 import { ShieldCheck, ArrowLeft, CreditCard, QrCode, Banknote, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -92,6 +92,26 @@ export default function CheckoutPage() {
     // Show Receipt Modal
     setReceiptData(newOrderData);
   };
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 min-h-[80vh]">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Checkout Pesanan
+            </h1>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (activeCheckoutItems.length === 0 && !receiptData) {
     return (

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Tag, HeartHandshake, ShieldCheck, ArrowRight, Sparkles, Award, MapPin, PhoneCall, CheckCircle2 } from 'lucide-react';
+import { Tag, HeartHandshake, ShieldCheck, ArrowRight, Sparkles, Award, MapPin, PhoneCall, CheckCircle2, Phone } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -39,7 +39,7 @@ export default function Home() {
            <div className="pt-4">
               <Link
                 href="/katalog"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm rounded-2xl transition-all shadow-md active:scale-95"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm rounded-2xl transition-all shadow-md active:scale-95"
               >
                 <span>Jelajahi Katalog Sekarang</span>
                 <ArrowRight className="w-4 h-4" />
@@ -114,18 +114,18 @@ export default function Home() {
         </div>
 
         {/* Store Info Footer Banner */}
-        <div className="bg-slate-900 text-white p-6 sm:p-8 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shrink-0">
-              <MapPin className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-white">Alamat Lyffa Rajut</h4>
-              <p className="text-xs text-slate-400">Jl. Gandhinia No. 12, Surabaya, Jawa Timur</p>
-            </div>
-          </div>
+       <div className="bg-slate-900 text-white p-6 sm:p-8 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
+  <div className="flex items-center gap-4">
+    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shrink-0">
+      <Phone className="w-5 h-5" />
+    </div>
 
-        </div>
+    <div>
+      <h4 className="text-sm font-bold text-white">Kontak Kami</h4>
+      <p className="text-xs text-slate-400">0851-2218-7967 | WhatsApp</p>
+    </div>
+  </div>
+</div>
 
       </section>
 

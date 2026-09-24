@@ -31,14 +31,14 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4">
       <div className="bg-white max-w-md w-full p-8 rounded-3xl border border-slate-200 shadow-2xl space-y-6">
-        
+
         <div className="text-center space-y-2">
           <div className="w-14 h-14 bg-slate-100 text-slate-800 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
             <ShieldCheck className="w-7 h-7" />
           </div>
           <h2 className="text-2xl font-black text-slate-900">Login</h2>
           <p className="text-xs text-slate-500 font-medium">
-            Masuk untuk mengakses dashboard manajemen toko rajut
+            Untuk mengakses manajemen toko rajut
           </p>
         </div>
 

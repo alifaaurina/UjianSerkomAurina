@@ -96,9 +96,9 @@ export default function AdminProdukPage() {
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs sm:text-sm">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-   uppercase tracking-wider">
             <tr>
-              <th className="p-3">Produk</th>
+              <th className="p-3">Nama Produk</th>
               <th className="p-3">Kategori</th>
               <th className="p-3">Harga</th>
               <th className="p-3">Stok</th>
@@ -136,11 +136,10 @@ export default function AdminProdukPage() {
                       {formatRupiah(p.price)}
                     </td>
                     <td className="p-3">
-                      <span className={`text-xs font-black px-2.5 py-1 rounded-lg border ${
-                        p.stok > 0
+                      <span className={`text-xs font-black px-2.5 py-1 rounded-lg border ${p.stok > 0
                           ? 'bg-slate-100 text-slate-800 border-slate-200'
                           : 'bg-rose-50 text-rose-600 border-rose-200'
-                      }`}>
+                        }`}>
                         {p.stok} pcs
                       </span>
                     </td>

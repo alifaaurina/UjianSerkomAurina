@@ -4,17 +4,23 @@ import { useState } from 'react';
 import { useCart } from '@/lib/cartContext';
 import ReceiptModal from '@/components/ReceiptModal';
 import {
-  Trash2,
   Printer,
-  Filter
+  Filter,
+  Eye,
+  X,
+  ShoppingBag,
+  User,
+  Phone,
+  MapPin,
+  Calendar,
+  CreditCard
 } from 'lucide-react';
 
 export default function AdminLaporanPage() {
   const {
     products,
     categories,
-    transactions,
-    deleteTransactionState
+    transactions
   } = useCart();
 
   // Sales Filter States
@@ -23,8 +29,9 @@ export default function AdminLaporanPage() {
   const [periodFilter, setPeriodFilter] = useState('all'); // 'all' | 'today' | 'week' | 'month' | 'year'
   const [categoryFilter, setCategoryFilter] = useState('all');
 
-  // Receipt Modal State
+  // Receipt & Detail Modal States
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [selectedDetailTx, setSelectedDetailTx] = useState(null);
 
   const formatRupiah = (num) => {
     return new Intl.NumberFormat('id-ID', {
@@ -32,11 +39,6 @@ export default function AdminLaporanPage() {
       currency: 'IDR',
       maximumFractionDigits: 0,
     }).format(num);
-  };
-
-  const handleDeleteTransaction = (id) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) return;
-    deleteTransactionState(id);
   };
 
   // Filter transactions based on date, period, and category
@@ -177,7 +179,7 @@ export default function AdminLaporanPage() {
         <div>
           <h3 className="font-bold text-slate-900 text-sm">Laporan Pesanan & Transaksi</h3>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Kelola dan cetak rekapitulasi laporan penjualan toko rajut
+            Kelola dan cetak rekapitulasi laporan penjualan toko rajut (Permanen)
           </p>
         </div>
 
@@ -310,7 +312,7 @@ export default function AdminLaporanPage() {
               </tr>
             ) : (
               filteredTransactions.map((t, idx) => (
-                <tr key={idx} className="hover:bg-slate-50">
+                <tr key={idx} className="hover:bg-slate-50 transition-colors">
                   <td className="p-2.5 font-mono text-slate-900 font-bold">{t.id}</td>
                   <td className="p-2.5 text-slate-500">
                     {new Date(t.date).toLocaleString('id-ID')}
@@ -326,21 +328,21 @@ export default function AdminLaporanPage() {
                     {formatRupiah(t.total)}
                   </td>
                   <td className="p-2.5 text-right">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => setSelectedDetailTx(t)}
+                        className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
+                        title="Lihat Detail Transaksi"
+                      >
+                        <Eye className="w-4 h-4 text-slate-700" />
+                      </button>
+
                       <button
                         onClick={() => setSelectedReceipt(t)}
-                        className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-1 font-bold text-[11px] cursor-pointer"
-                        title="Cetak & Pratinjau Struk"
+                        className="p-2 bg-slate-900 text-white hover:bg-slate-800 rounded-xl transition-all shadow-xs cursor-pointer"
+                        title="Cetak Struk Resmi"
                       >
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>Cetak Struk</span>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTransaction(t.id)}
-                        className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                        title="Hapus Transaksi"
-                      >
-                        <Trash2 className="w-4 h-4" />
+                        <Printer className="w-4 h-4 text-white" />
                       </button>
                     </div>
                   </td>
@@ -350,6 +352,128 @@ export default function AdminLaporanPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Detail Transaksi Modal */}
+      {selectedDetailTx && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5 my-8 relative">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-slate-100 text-slate-800 rounded-xl flex items-center justify-center">
+                  <Eye className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm">
+                    Detail Transaksi
+                  </h3>
+                  <p className="text-[11px] font-mono text-slate-400">
+                    {selectedDetailTx.id}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSelectedDetailTx(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content Details */}
+            <div className="space-y-4 text-xs">
+              
+              {/* Info Pembeli */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2.5">
+                <h4 className="font-extrabold text-slate-900 text-[11px] uppercase tracking-wider text-slate-500">
+                  Informasi Pembeli
+                </h4>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <User className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="font-bold text-slate-900">{selectedDetailTx.nama}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{selectedDetailTx.whatsapp}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{new Date(selectedDetailTx.date).toLocaleString('id-ID')}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200">
+                      {selectedDetailTx.metode}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200/60 flex items-start gap-2 text-slate-700">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                  <span className="text-[11px] leading-relaxed">{selectedDetailTx.alamat}</span>
+                </div>
+              </div>
+
+              {/* Rincian Pesanan */}
+              <div className="space-y-2">
+                <h4 className="font-extrabold text-slate-900 text-[11px] uppercase tracking-wider text-slate-500">
+                  Rincian Barang Dipesan
+                </h4>
+
+                <div className="border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
+                  {selectedDetailTx.items?.map((item, idx) => (
+                    <div key={idx} className="p-3 flex justify-between items-center bg-white">
+                      <div>
+                        <p className="font-bold text-slate-900">{item.name}</p>
+                        <p className="text-[11px] text-slate-500">
+                          {item.quantity} x {formatRupiah(item.price)}
+                        </p>
+                      </div>
+                      <span className="font-extrabold text-slate-900">
+                        {formatRupiah(item.price * item.quantity)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Total Payment */}
+              <div className="p-4 bg-slate-900 text-white rounded-2xl flex justify-between items-center">
+                <span className="font-bold text-xs">Total Pembayaran:</span>
+                <span className="font-black text-base">{formatRupiah(selectedDetailTx.total)}</span>
+              </div>
+
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex gap-2 justify-end pt-2">
+              <button
+                onClick={() => setSelectedDetailTx(null)}
+                className="px-4 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+              >
+                Tutup
+              </button>
+              
+              <button
+                onClick={() => {
+                  setSelectedReceipt(selectedDetailTx);
+                  setSelectedDetailTx(null);
+                }}
+                className="px-4 py-2.5 text-xs font-extrabold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Cetak Struk Resmi</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* Transaction Receipt Modal */}
       <ReceiptModal

@@ -63,9 +63,9 @@ export default function ProductModal({ product, onClose, isAdminView = false }) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      
+
       <div className="relative bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col md:flex-row">
-        
+
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -94,27 +94,23 @@ export default function ProductModal({ product, onClose, isAdminView = false }) 
 
         {/* RIGHT: Product Information */}
         <div className="w-full md:w-1/2 p-6 flex flex-col justify-between space-y-4">
-          
+
           <div className="space-y-4">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                Kategori: {product.category}
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
                 {product.name}
               </h2>
 
               {!isAdminView && (
                 <div className="flex items-center gap-3 mt-2">
-                  <span className="text-2xl font-extrabold text-slate-500">
+                  <span className="text-2xl font-bold text-medium-500">
                     {formatRupiah(product.price)}
                   </span>
-                  
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${
-                    isOutOfStock
+
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${isOutOfStock
                       ? 'bg-rose-50 text-rose-500 border-rose-200'
                       : 'bg-slate-50 text-slate-500 border-slate-200'
-                  }`}>
+                    }`}>
                     <Package className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" />
                     {isOutOfStock ? 'Stok Habis' : `Stok: ${product.stok}`}
                   </span>
@@ -124,7 +120,7 @@ export default function ProductModal({ product, onClose, isAdminView = false }) 
 
             {/* Description */}
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-1">
-              <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <h4 className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
                 Deskripsi Produk
               </h4>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-h-48 overflow-y-auto font-medium">
