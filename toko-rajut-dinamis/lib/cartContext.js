@@ -5,70 +5,8 @@ import { supabase } from './supabase';
 
 const CartContext = createContext();
 
-const INITIAL_MOCK_PRODUCTS = [
-  {
-    id: 1,
-    name: 'Sweater Rajut Wool Modern',
-    category: 'Atasan',
-    price: 185000,
-    stok: 12,
-    image: '/img/produk/sweater-wool.jpg',
-    description: 'Sweater rajut wanita terbuat dari serat wol kualitas premium, lembut di kulit, hangat, dan memberikan tampilan estetik modern.',
-  },
-  {
-    id: 2,
-    name: 'Cardigan Rajut Ribbon Cream',
-    category: 'Atasan',
-    price: 165000,
-    stok: 8,
-    image: '/img/produk/cardigan-ribbon.jpg',
-    description: 'Cardigan rajut dengan aksen pita merah kontras yang manis. Cocok untuk busana santai maupun acara hangat.',
-  },
-  {
-    id: 3,
-    name: 'Syal Rajut Musim Dingin Sky Blue',
-    category: 'Syal',
-    price: 75000,
-    stok: 20,
-    image: '/img/produk/syal-sky-blue.jpg',
-    description: 'Syal rajutan tangan rajut tebal nan lembut, menjaga leher tetap hangat saat cuaca dingin.',
-  },
-  {
-    id: 4,
-    name: 'Topi Kupluk Rajut Beanie Classic',
-    category: 'Topi',
-    price: 55000,
-    stok: 15,
-    image: '/img/produk/topi-beanie.jpg',
-    description: 'Beanie hat rajutan elastis dengan benang acrilic super soft. Nyaman dipakai seharian.',
-  },
-  {
-    id: 5,
-    name: 'Tas Rajut Tote Shoulder Floral',
-    category: 'Tas',
-    price: 125000,
-    stok: 6,
-    image: '/img/produk/tas-tote.jpg',
-    description: 'Tas bahu rajut rajutan gaya bohemian estetik. Kuat menampung barang bawaan sehari-hari.',
-  },
-  {
-    id: 6,
-    name: 'Gantungan Kunci Amigurumi Boneka',
-    category: 'Aksesoris',
-    price: 35000,
-    stok: 25,
-    image: '/img/produk/gantungan-amigurumi.jpg',
-    description: 'Gantungan kunci kerajinan amigurumi bentuk boneka lucu 100% handmade buatan pengrajin lokal.',
-  },
-];
-
-const INITIAL_CATEGORIES = [
-  { id: 1, nama_kategori: 'Syal' },
-  { id: 2, nama_kategori: 'Topi' },
-  { id: 3, nama_kategori: 'Tas' },
-  { id: 4, nama_kategori: 'Atasan' },
-  { id: 5, nama_kategori: 'Aksesoris' },
-];
+const INITIAL_MOCK_PRODUCTS = [];
+const INITIAL_CATEGORIES = [];
 
 export function CartProvider({ children }) {
   const [products, setProducts] = useState([]);
@@ -125,32 +63,32 @@ export function CartProvider({ children }) {
         }
       }
 
-      // 2. Products: Check LocalStorage first to preserve user CRUD edits (image, name, stock)
-      const localProds = localStorage.getItem('lyffa_products');
-      if (localProds) {
-        try {
-          setProducts(JSON.parse(localProds));
-        } catch (e) {
-          setProducts(INITIAL_MOCK_PRODUCTS);
-        }
-      } else {
-        const { data: prodData, error: prodErr } = await supabase
-          .from('produk')
-          .select('*, kategori(nama_kategori)')
-          .order('id', { ascending: true });
+      // 2. Products: Fetch from Supabase FIRST so stock changes from other buyers/laptops are always synced in real-time!
+      const { data: prodData, error: prodErr } = await supabase
+        .from('produk')
+        .select('*, kategori(nama_kategori)')
+        .order('id', { ascending: true });
 
-        if (!prodErr && prodData && prodData.length > 0) {
-          const mapped = prodData.map((p) => ({
-            id: p.id,
-            name: p.nama_produk,
-            category: p.kategori ? p.kategori.nama_kategori : 'Umum',
-            price: p.harga,
-            stok: p.stok !== undefined && p.stok !== null ? p.stok : (p.stock !== undefined ? p.stock : 10),
-            image: p.gambar || '/img/produk/sweater-wool.jpg',
-            description: p.deskripsi || 'Produk rajutan handmade berkualitas tinggi.',
-          }));
-          setProducts(mapped);
-          localStorage.setItem('lyffa_products', JSON.stringify(mapped));
+      if (!prodErr && prodData && prodData.length > 0) {
+        const mapped = prodData.map((p) => ({
+          id: p.id,
+          name: p.nama_produk,
+          category: p.kategori ? p.kategori.nama_kategori : 'Umum',
+          price: p.harga,
+          stok: p.stok !== undefined && p.stok !== null ? p.stok : (p.stock !== undefined ? p.stock : 10),
+          image: p.gambar || '/img/produk/sweater-wool.jpg',
+          description: p.deskripsi || 'Produk rajutan handmade berkualitas tinggi.',
+        }));
+        setProducts(mapped);
+        localStorage.setItem('lyffa_products', JSON.stringify(mapped));
+      } else {
+        const localProds = localStorage.getItem('lyffa_products');
+        if (localProds) {
+          try {
+            setProducts(JSON.parse(localProds));
+          } catch (e) {
+            setProducts(INITIAL_MOCK_PRODUCTS);
+          }
         } else {
           setProducts(INITIAL_MOCK_PRODUCTS);
           localStorage.setItem('lyffa_products', JSON.stringify(INITIAL_MOCK_PRODUCTS));
@@ -248,6 +186,21 @@ export function CartProvider({ children }) {
     refreshData();
     const session = localStorage.getItem('admin_session');
     if (session) setAdminSession(JSON.parse(session));
+
+    // Auto-sync every 5 seconds so multi-device/multi-laptop stock & sales transactions stay 100% fresh!
+    const interval = setInterval(() => {
+      refreshData();
+    }, 5000);
+
+    const handleFocus = () => {
+      refreshData();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Save Cart to LocalStorage
@@ -349,21 +302,33 @@ export function CartProvider({ children }) {
 
   // Complete Order & Stock Reduction
   const completeOrder = async (orderData) => {
-    const updatedProducts = products.map((prod) => {
-      const cartItem = orderData.items?.find((item) => item.id === prod.id);
-      if (cartItem) {
-        const newStock = Math.max(0, prod.stok - cartItem.quantity);
-        try {
-          supabase
-            .from('produk')
-            .update({ stok: newStock })
-            .eq('id', prod.id)
-            .then(() => {});
-        } catch (e) {}
-        return { ...prod, stok: newStock };
+    const updatedProducts = [...products];
+
+    if (orderData.items?.length > 0) {
+      for (const item of orderData.items) {
+        const prodIndex = updatedProducts.findIndex(
+          (p) => p.id === item.id || p.name?.toLowerCase().trim() === item.name?.toLowerCase().trim()
+        );
+        if (prodIndex > -1) {
+          const targetProd = updatedProducts[prodIndex];
+          const newStock = Math.max(0, (targetProd.stok !== undefined ? targetProd.stok : 10) - item.quantity);
+          updatedProducts[prodIndex] = { ...targetProd, stok: newStock };
+
+          // Sync stock reduction to Supabase database
+          try {
+            let updateQuery = supabase.from('produk').update({ stok: newStock });
+            if (typeof targetProd.id === 'number' && targetProd.id < 1000000) {
+              updateQuery = updateQuery.eq('id', targetProd.id);
+            } else {
+              updateQuery = updateQuery.eq('nama_produk', targetProd.name);
+            }
+            await updateQuery;
+          } catch (e) {
+            console.error('Failed to update stock in Supabase:', e);
+          }
+        }
       }
-      return prod;
-    });
+    }
 
     setProducts(updatedProducts);
     localStorage.setItem('lyffa_products', JSON.stringify(updatedProducts));
@@ -402,10 +367,18 @@ export function CartProvider({ children }) {
       console.log('Supabase transaction sync skipped:', err);
     }
 
-    // Clear cart ONLY IF it was NOT a direct buy! (Direct buy leaves cart items untouched)
-    if (!orderData.isDirectBuy) {
-      clearCart();
-    }
+    // Remove ONLY the checked-out items from cart (so un-checked-out items remain in cart, and checked-out items are deleted from cart)
+    setCartItems((prev) => {
+      const checkedOutIds = new Set(orderData.items?.map((item) => item.id));
+      const remainingCart = prev.filter((item) => !checkedOutIds.has(item.id));
+      localStorage.setItem('lyffa_cart', JSON.stringify(remainingCart));
+      return remainingCart;
+    });
+
+    // Trigger immediate refreshData to sync all states
+    setTimeout(() => {
+      refreshData();
+    }, 300);
   };
 
   // Admin Auth Helpers
