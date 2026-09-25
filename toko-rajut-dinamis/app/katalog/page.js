@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, ShoppingBag, Grid, Tag, Sparkles } from 'lucide-react';
+import { Search, ShoppingBag, Grid, Tag, Sparkles, Loader2 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 import ProductCard from '@/components/ProductCard';
 import ProductModal from '@/components/ProductModal';
@@ -82,11 +82,13 @@ export default function KatalogPage() {
       </div>
 
       {/* PRODUCT GRID SECTION */}
-      {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {[1, 2, 3, 4, 5, 6].map((n) => (
-            <div key={n} className="bg-white border border-slate-200 rounded-2xl p-4 h-72 animate-pulse" />
-          ))}
+      {loading && products.length === 0 ? (
+        <div className="bg-white border border-slate-200 rounded-3xl p-16 text-center space-y-4 shadow-sm my-4 flex flex-col items-center justify-center">
+          <Loader2 className="w-8 h-8 text-slate-800 animate-spin" />
+          <div className="space-y-1">
+            <h3 className="text-sm sm:text-base font-bold text-slate-900">Memuat Katalog Produk...</h3>
+            <p className="text-xs text-slate-500 font-medium">Mohon tunggu sebentar, sedang menyinkronkan data toko</p>
+          </div>
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-3 shadow-sm">

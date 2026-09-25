@@ -28,7 +28,7 @@ export default function AdminKategoriPage() {
     const { data, error } = await supabase
       .from('kategori')
       .select('*')
-      .order('id');
+      .order('id', { ascending: false });
 
     if (error) {
       console.error('Gagal fetch kategori:', error);

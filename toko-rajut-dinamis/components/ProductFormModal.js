@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Check, Upload, Image as ImageIcon } from 'lucide-react';
+import { X, Check, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '@/lib/cartContext';
 
@@ -23,8 +23,10 @@ export default function ProductFormModal({
     description: '',
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
+    if (!isOpen) return;
     if (productToEdit) {
       setFormData({
         name: productToEdit.name || '',
@@ -44,24 +46,57 @@ export default function ProductFormModal({
         description: '',
       });
     }
-  }, [productToEdit, categories, isOpen]);
+  }, [isOpen, productToEdit]);
 
   if (!isOpen) return null;
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Read file as base64 Data URL so it works seamlessly locally & saved to state/db
-    const reader = new FileReader();
-    reader.onload = () => {
-      setFormData((prev) => ({ ...prev, image: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+      const filePath = `produk/${fileName}`;
+
+      // Upload file directly to Supabase Storage bucket 'produk-images'
+      const { data, error: uploadError } = await supabase.storage
+        .from('produk-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload Error:', uploadError);
+        alert('Gagal mengunggah gambar ke Supabase Storage: ' + uploadError.message + '\n\nPastikan bucket "produk-images" sudah dibuat dan diset Public di Supabase Dashboard.');
+        setUploading(false);
+        return;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('produk-images')
+        .getPublicUrl(filePath);
+
+      if (urlData?.publicUrl) {
+        setFormData((prev) => ({ ...prev, image: urlData.publicUrl }));
+      }
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      alert('Terjadi kesalahan saat mengunggah gambar.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (uploading) {
+      alert('Mohon tunggu hingga proses unggah gambar selesai.');
+      return;
+    }
     if (!formData.name || !formData.price) {
       alert('Mohon isi nama dan harga produk.');
       return;
@@ -202,14 +237,6 @@ export default function ProductFormModal({
 
         if (insertError) {
           console.error('Supabase product insert error:', insertError);
-          // Retry with default image path if Base64 string was too long for column
-          if (insertError.message?.includes('value too long') || insertError.code === '22001') {
-            const fallbackPayload = {
-              ...insertPayload,
-              gambar: '/img/produk/sweater-wool.jpg',
-            };
-            await supabase.from('produk').insert(fallbackPayload);
-          }
         } else if (insertedData && insertedData[0]) {
           // Sync real DB ID to local state if available
           updateProductState(newProductObj.id, { id: insertedData[0].id });
@@ -306,36 +333,50 @@ export default function ProductFormModal({
             </div>
           </div>
 
-          {/* FILE UPLOAD INPUT */}
+          {/* UPLOAD FILE GAMBAR ASLI (SUPABASE STORAGE NATIVE) */}
           <div>
             <label className="block font-bold text-slate-700 mb-1">
-              Upload Foto Produk (JPG/PNG) <span className="text-rose-500">*</span>
+              Upload Foto Produk (Supabase Storage) <span className="text-rose-500">*</span>
             </label>
             <div className="relative border-2 border-dashed border-slate-200 hover:border-slate-400 rounded-2xl p-4 text-center bg-slate-50 transition-colors">
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={uploading}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
               />
               <div className="flex flex-col items-center justify-center space-y-1">
-                <Upload className="w-6 h-6 text-slate-400" />
-                <span className="text-xs font-bold text-slate-700">Pilih Gambar</span>
-                <span className="text-[10px] text-slate-400">Format: JPG, PNG, WEBP (Maks 5MB)</span>
+                {uploading ? (
+                  <>
+                    <Loader2 className="w-6 h-6 text-slate-800 animate-spin" />
+                    <span className="text-xs font-bold text-slate-800">Mengunggah ke Supabase Storage...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-6 h-6 text-slate-400" />
+                    <span className="text-xs font-bold text-slate-700">Pilih & Upload File Gambar</span>
+                    <span className="text-[10px] text-slate-400">File fisik otomatis diunggah ke Bucket "produk-images"</span>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Image Preview */}
+            {/* Pratinjau Gambar */}
             {formData.image && (
               <div className="mt-3 flex items-center gap-3 bg-slate-100 p-2.5 rounded-xl border border-slate-200">
                 <img
                   src={formData.image}
                   alt="Pratinjau"
                   className="w-12 h-12 object-cover rounded-lg border bg-white"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/img/produk/sweater-wool.jpg';
+                  }}
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-slate-800 truncate">Foto Produk Terpilih</p>
-                  <p className="text-[10px] text-slate-500">Siap disimpan ke katalog</p>
+                  <p className="text-[10px] text-slate-500 font-mono truncate">{formData.image}</p>
                 </div>
               </div>
             )}
@@ -364,11 +405,23 @@ export default function ProductFormModal({
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-md transition-colors"
+              disabled={loading || uploading}
+              className="flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 rounded-xl shadow-md transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
-              <Check className="w-4 h-4" />
-              <span>{loading ? 'Menyimpan...' : productToEdit ? 'Simpan Perubahan' : 'Tambah Produk'}</span>
+              {loading || uploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Check className="w-4 h-4" />
+              )}
+              <span>
+                {uploading
+                  ? 'Mengunggah Gambar...'
+                  : loading
+                  ? 'Menyimpan...'
+                  : productToEdit
+                  ? 'Simpan Perubahan'
+                  : 'Tambah Produk'}
+              </span>
             </button>
           </div>
 

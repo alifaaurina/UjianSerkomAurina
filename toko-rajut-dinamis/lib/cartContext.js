@@ -37,14 +37,16 @@ export function CartProvider({ children }) {
   };
 
   // Sync Data from Supabase & LocalStorage
-  const refreshData = async () => {
-    setLoading(true);
+  const refreshData = async (isInitial = false) => {
+    if (isInitial) {
+      setLoading(true);
+    }
     try {
       // 1. Categories: Fetch from Supabase first if available, fallback to LocalStorage
       const { data: catData, error: catErr } = await supabase
         .from('kategori')
         .select('*')
-        .order('id', { ascending: true });
+        .order('id', { ascending: false });
 
       if (!catErr && catData && catData.length > 0) {
         setCategories(catData);
@@ -57,9 +59,6 @@ export function CartProvider({ children }) {
           } catch (e) {
             setCategories(INITIAL_CATEGORIES);
           }
-        } else {
-          setCategories(INITIAL_CATEGORIES);
-          localStorage.setItem('lyffa_categories', JSON.stringify(INITIAL_CATEGORIES));
         }
       }
 
@@ -67,7 +66,7 @@ export function CartProvider({ children }) {
       const { data: prodData, error: prodErr } = await supabase
         .from('produk')
         .select('*, kategori(nama_kategori)')
-        .order('id', { ascending: true });
+        .order('id', { ascending: false });
 
       if (!prodErr && prodData && prodData.length > 0) {
         const mapped = prodData.map((p) => ({
@@ -89,9 +88,6 @@ export function CartProvider({ children }) {
           } catch (e) {
             setProducts(INITIAL_MOCK_PRODUCTS);
           }
-        } else {
-          setProducts(INITIAL_MOCK_PRODUCTS);
-          localStorage.setItem('lyffa_products', JSON.stringify(INITIAL_MOCK_PRODUCTS));
         }
       }
 
@@ -138,7 +134,7 @@ export function CartProvider({ children }) {
             id: d.id_produk,
             name: d.nama_produk,
             price: d.harga_satuan,
-            quantity: d.jumlah,
+            jumlah: d.jumlah,
           })),
         }));
         setTransactions(mappedTx);
@@ -154,21 +150,6 @@ export function CartProvider({ children }) {
             }));
             setTransactions(updatedTx);
           } catch (e) {}
-        } else {
-          const dummyTx = [
-            {
-              id: 'TRX-20260915-001',
-              date: new Date().toISOString(),
-              nama: 'Siti Rahma',
-              whatsapp: '08123456789',
-              alamat: 'Jl. Pemuda No. 45, Bandung',
-              metode: 'QRIS',
-              total: 185000,
-              items: [{ name: 'Sweater Rajut Wool Modern', price: 185000, quantity: 1 }],
-            },
-          ];
-          setTransactions(dummyTx);
-          localStorage.setItem('sales_transactions', JSON.stringify(dummyTx));
         }
       }
     } catch (err) {
@@ -183,17 +164,44 @@ export function CartProvider({ children }) {
   };
 
   useEffect(() => {
-    refreshData();
+    if (typeof window !== 'undefined') {
+      const savedCart = localStorage.getItem('lyffa_cart');
+      if (savedCart) {
+        try {
+          setCartItems(JSON.parse(savedCart));
+        } catch (e) {}
+      }
+      const savedProds = localStorage.getItem('lyffa_products');
+      if (savedProds) {
+        try {
+          const parsed = JSON.parse(savedProds);
+          if (parsed && parsed.length > 0) {
+            setProducts(parsed);
+            setLoading(false);
+          }
+        } catch (e) {}
+      }
+      const savedCats = localStorage.getItem('lyffa_categories');
+      if (savedCats) {
+        try {
+          const parsedCat = JSON.parse(savedCats);
+          if (parsedCat && parsedCat.length > 0) setCategories(parsedCat);
+        } catch (e) {}
+      }
+    }
+
+    refreshData(false);
+
     const session = localStorage.getItem('admin_session');
     if (session) setAdminSession(JSON.parse(session));
 
-    // Auto-sync every 5 seconds so multi-device/multi-laptop stock & sales transactions stay 100% fresh!
+    // Auto-sync every 8 seconds so multi-device/multi-laptop stock & sales transactions stay 100% fresh!
     const interval = setInterval(() => {
-      refreshData();
-    }, 5000);
+      refreshData(false);
+    }, 8000);
 
     const handleFocus = () => {
-      refreshData();
+      refreshData(false);
     };
     window.addEventListener('focus', handleFocus);
 
@@ -211,7 +219,7 @@ export function CartProvider({ children }) {
   // Product CRUD Helpers
   const addProductState = (newProduct) => {
     setProducts((prev) => {
-      const updated = [...prev, newProduct];
+      const updated = [newProduct, ...prev];
       localStorage.setItem('lyffa_products', JSON.stringify(updated));
       return updated;
     });
@@ -236,10 +244,9 @@ export function CartProvider({ children }) {
   // Category CRUD Helpers
   const addCategoryState = (newCat) => {
     setCategories((prev) => {
-      const updated = [...prev, newCat];
-      const normalized = normalizeCategoryIds(updated);
-      localStorage.setItem('lyffa_categories', JSON.stringify(normalized));
-      return normalized;
+      const updated = [newCat, ...prev];
+      localStorage.setItem('lyffa_categories', JSON.stringify(updated));
+      return updated;
     });
   };
 
