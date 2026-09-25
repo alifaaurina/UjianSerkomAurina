@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useCart } from '@/lib/cartContext';
 import ReceiptModal from '@/components/ReceiptModal';
+import handlePrintReport from './PrintLaporan';
 import {
   Printer,
   Filter,
@@ -94,83 +95,6 @@ export default function AdminLaporanPage() {
 
   const filteredOmzet = filteredTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
 
-  const handlePrintReport = (itemsToPrint, titleSuffix = '') => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert('Gagal membuka jendela cetak. Pastikan pop-up dibolehkan di browser Anda.');
-      return;
-    }
-
-    const rowsHtml = itemsToPrint.length === 0
-      ? `<tr><td colspan="7" style="text-align: center; padding: 20px; color: #888;">Tidak ada data transaksi.</td></tr>`
-      : itemsToPrint.map((t) => `
-          <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">${t.id}</td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${new Date(t.date).toLocaleString('id-ID')}</td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">${t.nama}</td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${t.whatsapp}</td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${t.metode}</td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-size: 11px;">
-              ${(t.items || []).map(i => `${i.name} (${i.quantity}x)`).join(', ')}
-            </td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold; text-align: right;">
-              ${formatRupiah(t.total)}
-            </td>
-          </tr>
-        `).join('');
-
-    const totalOmzetPrint = itemsToPrint.reduce((sum, t) => sum + (t.total || 0), 0);
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Laporan Penjualan - Lyffa Rajut</title>
-          <style>
-            body { font-family: sans-serif; padding: 20px; color: #333; }
-            h1 { font-size: 20px; margin-bottom: 5px; color: #111; }
-            p { font-size: 12px; color: #666; margin-top: 0; margin-bottom: 20px; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; }
-            th { background: #1e293b; color: #fff; padding: 10px 8px; text-align: left; }
-            .total-box { margin-top: 20px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; font-weight: bold; font-size: 14px; text-align: right; }
-            @media print {
-              body { padding: 0; }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>Laporan Penjualan Lyffa Rajut ${titleSuffix}</h1>
-          <p>Tanggal Cetak: ${new Date().toLocaleString('id-ID')} | Total Transaksi: ${itemsToPrint.length}</p>
-          <table>
-            <thead>
-              <tr>
-                <th>No. Transaksi</th>
-                <th>Waktu</th>
-                <th>Pembeli</th>
-                <th>WhatsApp</th>
-                <th>Metode</th>
-                <th>Rincian Barang</th>
-                <th style="text-align: right;">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
-          </table>
-          <div class="total-box">
-            Total Omzet Penjualan: ${formatRupiah(totalOmzetPrint)}
-          </div>
-          <script>
-            window.onload = function() {
-              window.print();
-            }
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
-
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6">
       
@@ -185,7 +109,7 @@ export default function AdminLaporanPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => handlePrintReport(filteredTransactions, '(Sesuai Filter)')}
+            onClick={() => handlePrintReport(filteredTransactions, true, { startDate, endDate, periodFilter, categoryFilter })}
             className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer"
           >
             <Printer className="w-3.5 h-3.5" />
@@ -193,7 +117,7 @@ export default function AdminLaporanPage() {
           </button>
 
           <button
-            onClick={() => handlePrintReport(transactions, '(Semua Data)')}
+            onClick={() => handlePrintReport(transactions, false, { startDate: '', endDate: '', periodFilter: 'all', categoryFilter: 'all' })}
             className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-all border border-slate-200 flex items-center gap-1.5 active:scale-95 cursor-pointer"
           >
             <Printer className="w-3.5 h-3.5 text-slate-600" />
