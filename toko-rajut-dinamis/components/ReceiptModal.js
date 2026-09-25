@@ -124,16 +124,20 @@ export default function ReceiptModal({ receiptData, onClose, redirectOnClose = f
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                 Rincian Pesanan
               </span>
-              {receiptData.items?.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center text-xs gap-2">
-                  <span className="text-slate-800 font-semibold whitespace-normal break-words flex-1">
-                    {item.name} <span className="text-slate-500 text-[11px]">({item.quantity}x)</span>
-                  </span>
-                  <span className="font-bold text-slate-900 shrink-0">
-                    {formatRupiah(item.price * item.quantity)}
-                  </span>
-                </div>
-              ))}
+              {receiptData.items?.map((item, idx) => {
+                const qty = Number(item.quantity || item.jumlah || 1);
+                const price = Number(item.price || item.harga || 0);
+                return (
+                  <div key={idx} className="flex justify-between items-center text-xs gap-2">
+                    <span className="text-slate-800 font-semibold whitespace-normal break-words flex-1">
+                      {item.name || item.nama_produk} <span className="text-slate-500 text-[11px]">({qty}x)</span>
+                    </span>
+                    <span className="font-bold text-slate-900 shrink-0">
+                      {formatRupiah(price * qty)}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Total Amount */}

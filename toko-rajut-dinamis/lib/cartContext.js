@@ -133,8 +133,9 @@ export function CartProvider({ children }) {
           items: (t.detail_transaksi || []).map((d) => ({
             id: d.id_produk,
             name: d.nama_produk,
-            price: d.harga_satuan,
-            jumlah: d.jumlah,
+            price: Number(d.harga_satuan || 0),
+            jumlah: Number(d.jumlah || 1),
+            quantity: Number(d.jumlah || 1),
           })),
         }));
         setTransactions(mappedTx);

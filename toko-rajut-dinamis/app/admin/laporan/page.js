@@ -350,19 +350,23 @@ export default function AdminLaporanPage() {
                 </h4>
 
                 <div className="border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
-                  {selectedDetailTx.items?.map((item, idx) => (
-                    <div key={idx} className="p-3 flex justify-between items-center bg-white">
-                      <div>
-                        <p className="font-bold text-slate-900">{item.name}</p>
-                        <p className="text-[11px] text-slate-500">
-                          {item.quantity} x {formatRupiah(item.price)}
-                        </p>
+                  {selectedDetailTx.items?.map((item, idx) => {
+                    const qty = Number(item.quantity || item.jumlah || 1);
+                    const price = Number(item.price || item.harga || 0);
+                    return (
+                      <div key={idx} className="p-3 flex justify-between items-center bg-white">
+                        <div>
+                          <p className="font-bold text-slate-900">{item.name || item.nama_produk}</p>
+                          <p className="text-[11px] text-slate-500">
+                            {qty} x {formatRupiah(price)}
+                          </p>
+                        </div>
+                        <span className="font-extrabold text-slate-900">
+                          {formatRupiah(price * qty)}
+                        </span>
                       </div>
-                      <span className="font-extrabold text-slate-900">
-                        {formatRupiah(item.price * item.quantity)}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
